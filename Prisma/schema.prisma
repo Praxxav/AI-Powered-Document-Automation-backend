@@ -1,0 +1,22 @@
+// backend/schema.prisma
+
+generator client {
+  provider        = "prisma-client-py"
+  // previewFeatures = ["postgresqlExtensions"] // No longer needed if pgvector is removed
+}
+
+datasource db {
+  provider   = "postgresql"
+  // Make sure to set this environment variable, e.g., in a .env file
+  url        = env("DATABASE_URL")
+  // extensions = [pgvector] // This is not required for the current functionality
+}
+
+model Document {
+  id        String    @id @default(uuid())
+  status    String
+  insights  Json?
+  fullText  String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}

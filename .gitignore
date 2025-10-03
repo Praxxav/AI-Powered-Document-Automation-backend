@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Environment variables - Contains secrets!
+.env
+
+# Temporary uploaded files
+uploaded_documents/
+
+# IDE configuration
+.vscode/
+.idea/

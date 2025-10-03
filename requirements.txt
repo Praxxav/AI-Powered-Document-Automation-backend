@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+prisma
+psycopg2-binary
+python-docx
+PyPDF2
+google-generativeai
+python-dotenv
