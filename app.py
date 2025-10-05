@@ -13,8 +13,10 @@ import sys
 # Configure logging to display info level messages
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Import, specialized agents
-from agent.Banking import summarizer_agent, entity_extractor_agent, qa_agent
+# Import specialized agent modules
+import agent.Banking as banking_agents
+import agent.Law as law_agents
+from agent.router import classifier_agent
 from config import settings
 
 
@@ -40,9 +42,26 @@ async def process_document_in_background(document_id: str, file_path: str, file_
             await db.document.update(where={"id": document_id}, data={"status": "failed"})
             return
 
-        # 2. Use agents to generate insights asynchronously
-        summary_task = summarizer_agent.process(text_content)
-        entities_task = entity_extractor_agent.process(text_content)
+        # 2. Classify the document to select the correct agents
+        logging.info(f"Classifying document {document_id}...")
+        doc_type_raw = await classifier_agent.process(text_content)
+        doc_type = doc_type_raw.strip().lower() # e.g., "banking", "legal"
+        logging.info(f"Document {document_id} classified as: {doc_type}")
+
+        # Select the appropriate agent set based on classification
+        if "banking" in doc_type:
+            summarizer = banking_agents.summarizer_agent
+            entity_extractor = banking_agents.entity_extractor_agent
+        elif "legal" in doc_type:
+            summarizer = law_agents.summarizer_agent
+            entity_extractor = law_agents.entity_extractor_agent
+        else: # Fallback to a general agent if not classified
+            summarizer = banking_agents.summarizer_agent # Or a more generic one
+            entity_extractor = banking_agents.entity_extractor_agent
+
+        # 3. Use selected agents to generate insights asynchronously
+        summary_task = summarizer.process(text_content)
+        entities_task = entity_extractor.process(text_content)
         summary, entities_raw = await asyncio.gather(summary_task, entities_task)
 
         logging.info(f"Insights generated for document: {document_id}")
@@ -59,12 +78,13 @@ async def process_document_in_background(document_id: str, file_path: str, file_
         except (json.JSONDecodeError, AttributeError):
             entities = {"error": "Failed to parse entities from model output. The format was invalid.", "raw_output": entities_raw}
 
-        # 3. Store the final results in the database
+        # 4. Store the final results in the database
         await db.document.update(
             where={"id": document_id},
             data={
                 "status": "completed",
                 "insights": json.dumps({"summary": summary, "entities": entities}),
+                "documentType": doc_type,
                 "fullText": text_content,
             },
         )
@@ -216,6 +236,16 @@ async def query_document_endpoint(document_id: str, question: Dict[str, str]):
     if not user_question:
         raise HTTPException(status_code=400, detail="Question not provided.")
     
+    # Select the correct QA agent based on the stored document type
+    doc_type = doc.documentType
+    if doc_type == "banking":
+        qa_agent_instance = banking_agents.qa_agent
+    elif doc_type == "legal":
+        qa_agent_instance = law_agents.qa_agent
+    else:
+        # Fallback to a default QA agent
+        qa_agent_instance = banking_agents.qa_agent # Or a generic one
+
     # Use the agent to answer the question based on the stored full text
-    answer = await qa_agent.process(user_question, context=doc.fullText)
+    answer = await qa_agent_instance.process(user_question, context=doc.fullText)
     return {"document_id": document_id, "question": user_question, "answer": answer}
