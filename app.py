@@ -14,7 +14,7 @@ import sys
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Import, specialized agents
-from agent.Law import summarizer_agent, entity_extractor_agent, qa_agent
+from agent.Banking import summarizer_agent, entity_extractor_agent, qa_agent
 from config import settings
 
 
@@ -128,6 +128,13 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await db.disconnect()
+
+
+# @app.post("/analyze")
+# async def analyze_document(file: UploadFile):
+#     text = (await file.read()).decode("utf-8")
+#     result = analyze_legal_document(text)
+#     return JSONResponse(content=result)
 
 @app.post("/upload-document/")
 async def upload_document(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
