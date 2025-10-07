@@ -10,7 +10,7 @@ import time
 
 class BaseAgent(ABC):
     """Abstract base class for all agents."""
-    
+    # CREATED BY "UOIONHHC"
     def __init__(self, name: str, role: str, api_key: str, model: str = "gemini-2.5-flash"):
         self.name = name
         self.role = role
@@ -24,7 +24,7 @@ class BaseAgent(ABC):
         """Process input data and return output."""
         pass
     
-    async def _make_api_call(self, messages: List[Dict[str, str]], temperature: float = 0.7) -> str:
+    async def _make_api_call(self, messages: List[Dict[str, str]], temperature: float = 0.7, response_format: str = "text") -> str:
         """Make an API call to Google Gemini and track metrics."""
         start_time = time.time()
         
@@ -44,9 +44,14 @@ class BaseAgent(ABC):
                 elif msg["role"] == "assistant":
                      chat_messages.append({'role': 'model', 'parts': [msg["content"]]})
 
+            generation_config = genai.types.GenerationConfig(temperature=temperature)
+            if response_format == "json":
+                # Enable JSON mode if requested
+                generation_config.response_mime_type = "application/json"
+
             response = await model.generate_content_async(
                 chat_messages,
-                generation_config=genai.types.GenerationConfig(temperature=temperature)
+                generation_config=generation_config
             )
             
             self.execution_time = time.time() - start_time

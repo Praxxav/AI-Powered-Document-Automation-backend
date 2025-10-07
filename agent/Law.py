@@ -1,4 +1,4 @@
-from .base_agent import SimpleAgent
+from .base_agent import SimpleAgent, BaseAgent
 from config import settings
 from pydantic import BaseModel, Field
 import json
@@ -47,6 +47,22 @@ class LegalEntities(BaseModel):
 
 
 
+class EntityExtractorAgent(BaseAgent):
+    """An agent that extracts structured legal entities using Gemini's JSON mode."""
+    def __init__(self, api_key: str, model: str = "gemini-2.5-flash"):
+        super().__init__(name="EntityExtractorAgent", role="Extracts structured legal entities", api_key=api_key, model=model)
+        self.system_prompt = ENTITY_EXTRACTOR_PROMPT
+
+    async def process(self, input_data: str, context=None) -> dict:
+        """Processes text to extract entities as a dictionary conforming to LegalEntities."""
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": input_data}
+        ]
+        # Use JSON mode for reliable, structured output
+        raw_response = await self._make_api_call(messages, response_format="json")
+        return json.loads(raw_response)
+
 summarizer_agent = SimpleAgent(name="LegalSummarizer", role="Summarizes legal documents", api_key=settings.GEMINI_API_KEY, system_prompt=SUMMARIZER_PROMPT, model="gemini-2.5-flash")
-entity_extractor_agent = SimpleAgent(name="EntityExtractor", role="Extracts structured legal entities", api_key=settings.GEMINI_API_KEY, system_prompt=ENTITY_EXTRACTOR_PROMPT, model="gemini-2.5-flash")
+entity_extractor_agent = EntityExtractorAgent(api_key=settings.GEMINI_API_KEY, model="gemini-2.5-flash")
 qa_agent = SimpleAgent(name="QuestionAnsweringAgent", role="Answers questions about a document", api_key=settings.GEMINI_API_KEY, system_prompt=QA_PROMPT, model="gemini-2.5-flash")

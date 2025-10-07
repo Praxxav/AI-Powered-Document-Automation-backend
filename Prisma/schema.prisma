@@ -13,10 +13,43 @@ datasource db {
 }
 
 model Document {
-  id        String    @id @default(uuid())
-  status    String
-  insights  Json?
-  fullText  String?   @db.Text
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  status       String
+  insights     Json?
+  fullText     String?   @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  documentType String?   @map("document_type")
+
+  @@map("documents")
+}
+
+// --- Template Models for Document Drafting ---
+
+model Template {
+  id              String             @id @default(cuid())
+  title           String
+  fileDescription String?            @map("file_description")
+  jurisdiction    String?
+  docType         String?            @map("doc_type")
+  similarityTags  String[]           @map("similarity_tags")
+  bodyMd          String             @db.Text @map("body_md")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+  variables       TemplateVariable[]
+
+  @@map("templates")
+}
+
+model TemplateVariable {
+  id          String   @id @default(cuid())
+  key         String
+  label       String
+  description String?
+  example     String?
+  required    Boolean  @default(true)
+  template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  templateId  String   @map("template_id")
+
+  @@map("template_variables")
 }
