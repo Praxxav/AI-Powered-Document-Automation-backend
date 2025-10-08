@@ -99,7 +99,7 @@ DATABASE_URL="your_postgresql_connection_string_here"
 ```
 
 - `GEMINI_API_KEY`: Your API key from Google AI Studio.
-- `DATABASE_URL`:"postgresql://postgres:Pranav@940@db.wmtgzowbnjeiyohexqng.supabase.co:5432/postgres""
+- `DATABASE_URL`:"postgresql://postgres:dvd.supabase.co:5432/postgres""
 - `EVA_API_KEY`:"your_eva_api_key_here"
 
 
