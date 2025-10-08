@@ -1,5 +1,4 @@
-# Intelligent Document Drafting & Analysis API
-
+# Lexi Backend
 This project is a FastAPI backend for an AI-powered platform that transforms unstructured documents into structured, reusable templates and facilitates the drafting of new documents. It uses a suite of specialized AI agents for document analysis, template creation, and interactive drafting workflows.
 
 ## Architecture
@@ -26,9 +25,6 @@ This project is a FastAPI backend for an AI-powered platform that transforms uns
 Images
 ![alt text](image.png)
 
-## Architecture
-
-![alt text](image-2.png)
 The application is built around two core workflows: **Template-based Drafting** and **Document Analysis**.
 
 ### Template & Drafting Workflow
