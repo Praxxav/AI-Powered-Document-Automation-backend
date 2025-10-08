@@ -1,17 +1,20 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks, File, Form
 from fastapi.responses import FileResponse
 import tempfile
+from docx import Document
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 from fastapi.middleware.cors import CORSMiddleware
 from schemas import TemplateOut, DocumentOut, TemplateVariableOut   
 import os
-from markdown_it import MarkdownIt
+
 from typing import Dict, List
 import json
 import PyPDF2
 import docx
-import re # Added for robust JSON extraction
-import yaml # For parsing template front-matter
+import re 
+import yaml 
 import asyncio
 import logging
 import sys
@@ -23,8 +26,8 @@ from pydantic import BaseModel
 # Import specialized agent modules
 import agent.Law as law_agents
 from agent.router import classifier_agent
-from agent.templatizer import templatizer_agent # Import the new agent
-from agent.prefiller import prefiller_agent # Import the prefiller agent
+from agent.templatizer import templatizer_agent
+from agent.prefiller import prefiller_agent
 from agent.question_generator import question_generator_agent # Import the question generator agent
 from agent.bootstrap_agent import bootstrap_agent
 from config import settings
@@ -32,9 +35,6 @@ from config import settings
 
 from prisma import Prisma
 
-# --- Database Client ---
-# Instantiate the Prisma client
-# CREATED BY "UOIONHHC"
 db = Prisma()
 
 # --- Pydantic Models for API Payloads ---
@@ -554,41 +554,28 @@ async def generate_questions(request: GenerateQuestionsRequest):
     ]
 
     return {"missing_variables_questions": questions_to_ask}
-
-# CREATED BY "UOIONHHC"
 @app.post("/export/")
-async def export_document(
-    body: str = Form(...),
-    filename: str = Form(...),
-    filetype: str = Form(...),
-):
-    """
-    Exports the given markdown body to a .docx or .pdf file.
-    """
+async def export_document(body: str = Form(...), filename: str = Form(...), filetype: str = Form(...)):
     if filetype not in ["docx", "pdf"]:
-        raise HTTPException(status_code=400, detail="Unsupported filetype. Use 'docx' or 'pdf'.")
+        raise HTTPException(status_code=400, detail="Use 'docx' or 'pdf'")
+    
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=f".{filetype}")
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{filetype}") as tmp_file:
-        if filetype == "docx":
-            from docx import Document
-            document = Document()
-            # A simple approach to add markdown as paragraphs.
-            # For more complex markdown, a more robust parser would be needed.
-            for line in body.split('\n'):
-                document.add_paragraph(line)
-            document.save(tmp_file.name)
-        elif filetype == "pdf":
-            from md2pdf.core import md2pdf
-            # Using md2pdf which in turn uses pandoc.
-            # Ensure pandoc is installed on your system.
-            try:
-                md2pdf(tmp_file.name, md_content=body)
-            except Exception as e:
-                logging.error(f"PDF conversion failed: {e}")
-                raise HTTPException(status_code=500, detail="PDF conversion failed. Ensure pandoc is installed.")
+    if filetype == "docx":
+        doc = Document()
+        for line in body.split("\n"):
+            doc.add_paragraph(line)
+        doc.save(tmp_file.name)
+    else:  # PDF
+        c = canvas.Canvas(tmp_file.name, pagesize=A4)
+        width, height = A4
+        y = height - 50
+        for line in body.split("\n"):
+            c.drawString(50, y, line)
+            y -= 15
+            if y < 50:
+                c.showPage()
+                y = height - 50
+        c.save()
 
-        return FileResponse(
-            path=tmp_file.name,
-            filename=f"{filename}.{filetype}",
-            media_type=f"application/vnd.openxmlformats-officedocument.wordprocessingml.document" if filetype == "docx" else "application/pdf",
-        )
+    return FileResponse(tmp_file.name, filename=f"{filename}.{filetype}", media_type="application/pdf" if filetype=="pdf" else "application/vnd.openxmlformats-officedocument.wordprocessingml.document")

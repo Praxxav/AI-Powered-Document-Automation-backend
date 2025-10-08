@@ -2,6 +2,10 @@
 
 This project is a FastAPI backend for an AI-powered platform that transforms unstructured documents into structured, reusable templates and facilitates the drafting of new documents. It uses a suite of specialized AI agents for document analysis, template creation, and interactive drafting workflows.
 
+## Architecture
+
+![alt text](image-3.png)
+
 ## Features
 
 - **AI-Powered Template Generation**: Upload a `.docx`, `.pdf`, or `.txt` file to automatically generate a Markdown template with detected variables (`/create-template-from-upload/`).
@@ -19,8 +23,12 @@ This project is a FastAPI backend for an AI-powered platform that transforms uns
 - **Document Q&A**: Ask specific questions about a processed document and get AI-generated answers (`/document/{id}/query`).
 - **Persistent Storage**: Uses Prisma and PostgreSQL to store templates, variables, documents, and generated insights.
 
+Images
+![alt text](image.png)
+
 ## Architecture
 
+![alt text](image-2.png)
 The application is built around two core workflows: **Template-based Drafting** and **Document Analysis**.
 
 ### Template & Drafting Workflow
@@ -96,6 +104,9 @@ DATABASE_URL="your_postgresql_connection_string_here"
 
 - `GEMINI_API_KEY`: Your API key from Google AI Studio.
 - `DATABASE_URL`:"postgresql://postgres:Pranav@940@db.wmtgzowbnjeiyohexqng.supabase.co:5432/postgres""
+- `EVA_API_KEY`:"your_eva_api_key_here"
+
+
 ### 5. Initialize Prisma
 
 Generate the Prisma client for Python.
