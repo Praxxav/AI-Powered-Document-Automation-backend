@@ -2,7 +2,6 @@ from agent.base_agent import BaseAgent
 from config import settings
 import json
 
-# CREATED BY "UOIONHHC"
 
 PREFILLER_PROMPT_TEMPLATE = """
 You are an expert data extraction assistant. Your task is to extract information from a user's query and map it to a list of predefined template variables.

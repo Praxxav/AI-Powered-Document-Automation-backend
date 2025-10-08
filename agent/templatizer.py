@@ -41,8 +41,6 @@ Dear Sir/Madam,
 On {{incident_date}}, {{claimant_full_name}} hereby notifies you under Policy {{policy_number}}...
 """
 
-# CREATED BY "UOIONHHC"
-
 # --- Agent Instance ---
 
 templatizer_agent = SimpleAgent(

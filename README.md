@@ -1,9 +1,34 @@
 # Lexi Backend
-This project is a FastAPI backend for an AI-powered platform that transforms unstructured documents into structured, reusable templates and facilitates the drafting of new documents. It uses a suite of specialized AI agents for document analysis, template creation, and interactive drafting workflows.
+FastAPI backend for transforming unstructured legal documents into structured, reusable templates and enabling intelligent drafting workflows.
+
+## Overview
+Backend powers an AI-assisted document automation system that:
+
+Ingests .docx or .pdf files.
+
+Extracts reusable variables (names, dates, clauses, IDs, etc.).
+
+Converts them into Markdown templates with YAML front-matter metadata.
+
+Enables interactive drafting — automatically filling, questioning, and generating legal drafts.
+
+Optionally uses Exa.ai for web bootstrapping when no suitable local template exists.
+
 
 ## Architecture
 
 ![alt text](image-3.png)
+Core Flow:
+
+Upload → Extract → Templatize using Gemini.
+
+Save templates with variables into a PostgreSQL database.
+
+Retrieve templates by similarity or classification.
+
+Draft → Q&A → Generate Markdown with variables fully substituted.
+
+(Bonus) Web Bootstrap via Exa.ai when no local match is found.
 
 ## Features
 

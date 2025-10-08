@@ -1,8 +1,6 @@
 from .base_agent import BaseAgent
 from config import settings
 
-# CREATED BY "UOIONHHC"
-
 QUESTION_GENERATOR_PROMPT_TEMPLATE = """
 You are an expert at creating user-friendly questions. Your task is to transform a variable's technical details into a polite, clear, and unambiguous question for an end-user.
 

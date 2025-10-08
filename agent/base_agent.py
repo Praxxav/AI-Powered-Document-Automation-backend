@@ -10,7 +10,6 @@ import time
 
 class BaseAgent(ABC):
     """Abstract base class for all agents."""
-    # CREATED BY "UOIONHHC"
     def __init__(self, name: str, role: str, api_key: str, model: str = "gemini-2.5-flash"):
         self.name = name
         self.role = role
