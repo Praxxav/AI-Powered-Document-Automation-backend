@@ -1,4 +1,4 @@
-# Lexi Backend
+# Backend
 FastAPI backend for transforming unstructured legal documents into structured, reusable templates and enabling intelligent drafting workflows.
 
 ## Overview
